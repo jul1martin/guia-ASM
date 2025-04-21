@@ -97,20 +97,57 @@ alternate_sum_4_using_c_alternative:
 
 
 ; uint32_t alternate_sum_8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4, uint32_t x5, uint32_t x6, uint32_t x7, uint32_t x8);
-; registros y pila: x1[?], x2[?], x3[?], x4[?], x5[?], x6[?], x7[?], x8[?]
+; registros y pila: x1[edi], x2[esi], x3[edx], x4[ecx], x5[r8d], x6[r9d], x7[ebp + 0x10], x8[ebp + 0x18]
 alternate_sum_8:
 	;prologo
+  push RBP ;pila alineada
+  mov RBP, RSP ;strack frame armado
 
-	; COMPLETAR
+  ; rax = 0
+  xor rax, rax
+
+  ; resta x1 -= x2
+  sub EDI, ESI
+  ; suma x1 += x3
+  add EDI, EDX
+  ; resta x1 -= x4
+  sub EDI, ECX
+  ; suma x1 += x5
+  add EDI, R8D
+  ; resta x1 -= x6
+  sub EDI, R9D
+  ; suma x1 += x9
+  add EDI, [rbp + 0x10]
+  ; resta x1 -= x8
+  sub EDI, [rbp + 0x18]
+
+  ; rax = edi
+  mov eax, edi
 
 	;epilogo
-	ret
+  pop RBP ;pila desalineada, RBP restaurado, RSP apuntando a la dirección de retorno
+  ret
 
 
 ; SUGERENCIA: investigar uso de instrucciones para convertir enteros a floats y viceversa
 ;void product_2_f(uint32_t * destination, uint32_t x1, float f1);
-;registros: destination[?], x1[?], f1[?]
+;registros: destination[edi], x1[esi], f1[xmm0]
 product_2_f:
+	push rbp
+	mov rbp, rsp
+
+  mov eax, esi
+
+  cvtsi2sd xmm1, eax
+  cvtss2sd xmm0, xmm0
+
+  mulsd xmm0, xmm1
+
+  cvttsd2si eax, xmm0
+
+	mov [rdi], eax
+
+	pop rbp
 	ret
 
 
@@ -118,22 +155,64 @@ product_2_f:
 ;, uint32_t x1, float f1, uint32_t x2, float f2, uint32_t x3, float f3, uint32_t x4, float f4
 ;, uint32_t x5, float f5, uint32_t x6, float f6, uint32_t x7, float f7, uint32_t x8, float f8
 ;, uint32_t x9, float f9);
-;registros y pila: destination[rdi], x1[?], f1[?], x2[?], f2[?], x3[?], f3[?], x4[?], f4[?]
-;	, x5[?], f5[?], x6[?], f6[?], x7[?], f7[?], x8[?], f8[?],
-;	, x9[?], f9[?]
+;registros y pila: destination[rdi], x1[esi], f1[xmm0], x2[edx], f2[xmm1], x3[ecx], f3[xmm2], x4[r8d], f4[xmm3]
+;	, x5[r9d], f5[xmm4], x6[rbp + 0x10], f6[xmm5], x7[rbp + 0x18], f7[xmm6], x8[rbp + 0x20], f8[xmm7],
+;	, x9[rbp + 0x28], f9[rbp + 0x30]
 product_9_f:
 	;prologo
 	push rbp
 	mov rbp, rsp
 
 	;convertimos los flotantes de cada registro xmm en doubles
-	; COMPLETAR
+  cvtss2sd xmm0, xmm0
+  cvtss2sd xmm1, xmm1
+  cvtss2sd xmm2, xmm2
+  cvtss2sd xmm3, xmm3
+  cvtss2sd xmm4, xmm4
+  cvtss2sd xmm5, xmm5
+  cvtss2sd xmm6, xmm6
+  cvtss2sd xmm7, xmm7
+  cvtss2sd xmm8, [rbp + 0x30]
 
 	;multiplicamos los doubles en xmm0 <- xmm0 * xmm1, xmmo * xmm2 , ...
-	; COMPLETAR
+  mulsd xmm0, xmm1
+  mulsd xmm0, xmm2
+  mulsd xmm0, xmm3
+  mulsd xmm0, xmm4
+  mulsd xmm0, xmm5
+  mulsd xmm0, xmm6
+  mulsd xmm0, xmm7
+  mulsd xmm0, xmm8
 
 	; convertimos los enteros en doubles y los multiplicamos por xmm0.
-	; COMPLETAR
+  	cvtsi2sd xmm1, rsi ; convert signed (double) integer to scalar double
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, rdx
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, rcx
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, r8
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, r9
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, [rbp + 0x10]
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, [rbp + 0x18]
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, [rbp + 0x20]
+	mulsd xmm0, xmm1
+
+	cvtsi2sd xmm1, [rbp + 0x28]
+	mulsd xmm0, xmm1
+
+	movsd [rdi], xmm0
 
 	; epilogo
 	pop rbp
