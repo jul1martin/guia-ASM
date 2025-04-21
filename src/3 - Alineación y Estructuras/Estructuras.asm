@@ -42,8 +42,6 @@ cantidad_total_de_elementos:
 		cmp rsi, 0 ; veo si es null
 		je .fin
 
-		add rdi, LISTA_SIZE
-
 		jmp .cicloxlista
 
 		.cicloxlista:
@@ -51,7 +49,7 @@ cantidad_total_de_elementos:
 			add eax, [rsi + NODO_OFFSET_LONGITUD]
 			
 			cmp rcx, 0
-			je .ciclo
+			je .fin
 
 			mov rsi, rcx 
 
@@ -74,8 +72,6 @@ cantidad_total_de_elementos_packed:
 		cmp rsi, 0 ; veo si es null
 		je .fin
 
-		add rdi, PACKED_LISTA_SIZE
-
 		jmp .cicloxlista
 
 		.cicloxlista:
@@ -84,7 +80,7 @@ cantidad_total_de_elementos_packed:
 			add eax, [rsi + PACKED_NODO_OFFSET_LONGITUD]
 			
 			cmp rcx, 0
-			je .ciclo
+			je .fin
 			
 			mov rsi, rcx 
 
